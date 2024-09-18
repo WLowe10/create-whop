@@ -1,6 +1,7 @@
 {
 	"name": "create-whop",
-	"version": "1.0.0",
+	"type": "module",
+	"version": "0.0.1",
 	"description": "The best way to create a Whop app",
 	"license": "MIT",
 	"author": {
@@ -12,28 +13,12 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": ""
-	},
-	"type": "module",
-	"sideEffects": false,
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			},
-			"require": {
-				"types": "./dist/index.d.cts",
-				"default": "./dist/index.cjs"
-			}
-		}
+		"url": "https://github.com/WLowe10/create-whop"
 	},
 	"files": [
 		"dist",
 		"package.json",
+		"template",
 		"README.md"
 	],
 	"bin": "./dist/cli.js",

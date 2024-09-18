@@ -44,9 +44,11 @@ export async function before(ctx) {
 
 	ctx.dir.path = dir;
 
-	ctx.data.app = {
-		name,
-	};
+	// no file templating needed yet, but this is where it would be
+
+	// ctx.data.app = {
+	// 	name,
+	// };
 
 	// --- format package.json ---
 
@@ -114,15 +116,6 @@ export async function after(ctx) {
 }
 
 // --- helpers ---
-
-/**
- * Converts a kebab or snake case string into camel case
- * @param {string} str
- */
-const kebabToCamel = (str) =>
-	str
-		.toLowerCase()
-		.replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace("-", "").replace("_", ""));
 
 /**
  * @param {string} destPath
