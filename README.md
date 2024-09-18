@@ -11,17 +11,17 @@ To scaffold a Whop app using `create-whop`, run any of the following commands de
 ### npm
 
 ```sh
-	npm create whop
+npm create whop
 ```
 
 ### pnpm
 
 ```sh
-	pnpm create whop
+pnpm create whop
 ```
 
 ### yarn
 
 ```sh
-	yarn create whop
+yarn create whop
 ```
