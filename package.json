@@ -1,0 +1,65 @@
+{
+	"name": "create-whop",
+	"version": "1.0.0",
+	"description": "The best way to create a Whop app",
+	"license": "MIT",
+	"author": {
+		"name": "Wes Lowe",
+		"email": "wesley.jlowe10@gmail.com"
+	},
+	"keywords": [
+		"whop"
+	],
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
+	"bin": "./dist/cli.js",
+	"scripts": {
+		"build": "tsup",
+		"dev": "NODE_ENV=development tsx ./src/cli.ts",
+		"format": "prettier --write .",
+		"publish-package": "pnpm build && pnpm publish",
+		"clean": "pnpm clean:dist && pnpm clean:dest && pnpm clean:modules",
+		"clean:dist": "rm -rf dist",
+		"clean:dest": "rm -rf dest",
+		"clean:modules": "rm -rf node_modules",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/gradient-string": "^1.1.6",
+		"@types/node": "^22.5.5",
+		"prettier": "^3.3.2",
+		"tsup": "^8.1.0",
+		"tsx": "^4.16.2",
+		"typescript": "^5.5.3"
+	},
+	"dependencies": {
+		"@clack/prompts": "^0.7.0",
+		"chalk": "^5.3.0",
+		"gradient-string": "^2.0.2",
+		"poopgen": "^0.3.0"
+	}
+}
