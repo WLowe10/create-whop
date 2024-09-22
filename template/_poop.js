@@ -1,13 +1,32 @@
-import * as p from "@clack/prompts";
-import * as utils from "poopgen/utils";
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
 import gradient from "gradient-string";
+import * as p from "@clack/prompts";
+import * as utils from "poopgen/utils";
+
+// https://brand.whop.com/colors
+const theme = {
+	orange: "#FF6143",
+	offWhite: "#D9D9D9", // RIP Virgil Abloh
+	limeade: "#47FFAC",
+};
+
+const orangeChalk = chalk.hex(theme.orange);
+const offWhiteChalk = chalk.hex(theme.offWhite);
+const limeadeChalk = chalk.hex(theme.limeade);
+const boldWarning = chalk.bold.redBright.bold("Warning:");
+const whopGradient = gradient([theme.orange, theme.offWhite]);
 
 /** @type{import("poopgen").BeforeFn} */
 export async function before(ctx) {
-	const whopGradient = gradient(["#FF6143", "#D9D9D9"]);
+	let totalProcessed;
+
+	try {
+		totalProcessed = await getTotalProcessed();
+	} catch {
+		// noop
+	}
 
 	console.log(
 		whopGradient.multiline(`
@@ -19,6 +38,17 @@ export async function before(ctx) {
                                                       /_/      
 `)
 	);
+
+	// display the total amount processed on Whop
+	if (totalProcessed) {
+		const date = new Date();
+
+		console.log(
+			`${chalk.gray(`[${date.toLocaleString("en-US", { hour: "numeric", minute: "numeric", second: "numeric", hour12: true })}]`)} ${chalk.italic(
+				`${limeadeChalk.bold("$" + Intl.NumberFormat().format(totalProcessed))} ${offWhiteChalk("purchased on Whop")}\n`
+			)}`
+		);
+	}
 
 	const result = await p.group(
 		{
@@ -42,13 +72,21 @@ export async function before(ctx) {
 
 	const { dir, name, packageName } = utils.parseProjectName(result.name, ctx.dir.path);
 
+	if (fs.existsSync(dir)) {
+		console.log(`${boldWarning} ${orangeChalk.bold(result.name)} already exists, aborting`);
+		process.exit(1);
+	}
+
+	// set the output directory
 	ctx.dir.path = dir;
 
-	// no file templating needed yet, but this is where it would be
+	// set start millseconds for after generation
+	ctx.data.startMS = Date.now();
 
-	// ctx.data.app = {
-	// 	name,
-	// };
+	// add the app's name to our context
+	ctx.data.app = {
+		name,
+	};
 
 	// --- format package.json ---
 
@@ -58,14 +96,20 @@ export async function before(ctx) {
 
 	const pkg = JSON.parse(packageJSONEntry.content);
 
+	// set the name to the name of the app
 	pkg.name = packageName;
 
+	// replace the contents with the updated package.json
 	packageJSONEntry.content = JSON.stringify(pkg, null, "\t");
 }
 
 /** @type{import("poopgen").AfterFn} */
 export async function after(ctx) {
 	const dest = ctx.dir.path;
+
+	console.log(
+		`\n${chalk.bold(orangeChalk(ctx.data.app.name))} ${offWhiteChalk(`scaffolded successfully in ${Date.now() - ctx.data.startMS}ms!`)} \n`
+	);
 
 	const nodePackageManager = utils.getNodePackageManager();
 
@@ -110,12 +154,43 @@ export async function after(ctx) {
 		}
 	}
 
+	// log next steps
+
+	console.log(orangeChalk.bold("\nNext steps:"));
+
 	if (process.cwd() !== dest) {
-		p.note(`cd ${path.relative(process.cwd(), dest)}`, "Next steps");
+		console.log(offWhiteChalk.italic(`  cd ${path.relative(process.cwd(), dest)}`));
+	}
+
+	if (!result.should_install_deps) {
+		if (nodePackageManager === "yarn") {
+			console.log(offWhiteChalk.italic("  yarn"));
+		} else {
+			console.log(offWhiteChalk.italic(`  ${nodePackageManager} install`));
+		}
+	}
+
+	if (nodePackageManager === "npm") {
+		console.log(offWhiteChalk.italic("  npm run whop-proxy"));
+	} else {
+		console.log(offWhiteChalk.italic(`  ${nodePackageManager} whop-proxy`));
 	}
 }
 
 // --- helpers ---
+
+/**
+ * gets the current total amount of money processed on Whop
+ *
+ * @returns {Promise<number>}
+ */
+async function getTotalProcessed() {
+	const response = await fetch("https://whop.com/api/stats");
+	const data = await response.json();
+
+	// @ts-ignore
+	return data.marketplaceStats.totalProcessed;
+}
 
 /**
  * @param {string} destPath
@@ -135,7 +210,7 @@ async function initGit(destPath) {
 			spinner.stop();
 
 			const shouldOverwriteGit = await p.confirm({
-				message: `${chalk.redBright("Warning:")} There is already a git repository. Initializing a new repository would delete the previous history. Would you like to continue?`,
+				message: `${boldWarning} There is already a git repository. Initializing a new repository would delete the previous history. Would you like to continue?`,
 				initialValue: false,
 			});
 
@@ -150,9 +225,7 @@ async function initGit(destPath) {
 			spinner.stop();
 
 			const shouldInitChildGitRepo = await p.confirm({
-				message: `${chalk.redBright.bold(
-					"Warning:"
-				)} "${dirName}" is already in a git worktree. Would you still like to initialize a new git repository in this directory?`,
+				message: `${boldWarning} "${dirName}" is already in a git worktree. Would you still like to initialize a new git repository in this directory?`,
 				initialValue: false,
 			});
 
