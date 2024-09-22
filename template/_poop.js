@@ -73,8 +73,12 @@ export async function before(ctx) {
 	const { dir, name, packageName } = utils.parseProjectName(result.name, ctx.dir.path);
 
 	if (fs.existsSync(dir)) {
-		console.log(`${boldWarning} ${orangeChalk.bold(result.name)} already exists, aborting`);
-		process.exit(1);
+		if (fs.readdirSync(dir).length > 0) {
+			console.log(
+				`${boldWarning} ${orangeChalk.bold(result.name)} already exists and is not empty, aborting`
+			);
+			process.exit(1);
+		}
 	}
 
 	// set the output directory
