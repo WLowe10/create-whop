@@ -75,7 +75,7 @@ export async function before(ctx) {
 	if (fs.existsSync(dir)) {
 		if (fs.readdirSync(dir).length > 0) {
 			console.log(
-				`${boldWarning} ${orangeChalk.bold(result.name)} already exists and is not empty, aborting`
+				`\n${boldWarning} ${orangeChalk.bold(result.name)} already exists and is not empty, aborting`
 			);
 			process.exit(1);
 		}
